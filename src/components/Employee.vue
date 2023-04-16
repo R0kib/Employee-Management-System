@@ -3,12 +3,14 @@ import { defineComponent, ref, onMounted } from 'vue';
 import axios from 'axios';
 
 
-interface Employee {
-  id: number,
-  name: string,
-  department: string,
-  email: string,
-  phone: string
+type Employee = {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  salary : number;
+  departmentId : number
 }
 
 
@@ -16,7 +18,68 @@ export default defineComponent({
   name: 'Employee',
   setup() {
     const employees = ref([]);
-    const dialog = ref(false)
+    var dialog = ref(false)
+
+
+    // variables for getting data from input form
+    var first_name = ref("")
+    var last_name = ref("")
+    var email = ref("")
+    var phone = ref("")
+    var salary = ref("")
+    var departmentId = ref("") 
+    
+    
+
+    // Insert new employee
+    const addEmployee = async () => {
+
+      // send form data to API
+      try
+      {
+        const data = {
+        firstname: first_name.value,
+        lastname: last_name.value,
+        email: email.value,
+        phone : phone.value,
+        salary: salary.value,
+        departmentId: departmentId.value
+      }
+
+      const response = await axios.post('http://localhost:5240/api/Employee/Insert_Employee', data)
+
+      console.log(response)
+
+        first_name.value = ""
+        last_name.value= ""
+        email.value = ""
+        phone.value = ""
+        salary.value = ""
+        departmentId.value = "" 
+
+        alert("Employee Inserted Successfully")
+
+        dialog.value = false;
+
+      }
+
+      catch(error)
+      {
+        console.log(error)
+        alert("Input All  the details first")
+      }
+      
+    }
+
+
+     // Delete an employee by id
+     const deleteEmployee = async (id: number) => {
+      await axios.delete(`http://localhost:5240/api/Employee/Delete Employee/${id}`);
+      alert("Employee Deleted Successfully");
+      // Remove the deleted employee from the employees array
+      employees.value = employees.value.filter((employee) => employee.id !== id);
+    };
+
 
     onMounted(async () => {
       const response = await axios.get('http://localhost:5240/api/Employee');
@@ -25,7 +88,15 @@ export default defineComponent({
 
     return { 
       employees,
-      dialog
+      dialog,
+      first_name,
+      last_name,
+      email,
+      phone,
+      salary,
+      departmentId,
+      addEmployee,
+      deleteEmployee,
     };
   },
 });
@@ -51,24 +122,22 @@ export default defineComponent({
           <v-container>
             <v-row>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field label="First name*" required></v-text-field>
+                <v-text-field label="First name*" required v-model="first_name"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field
-                  label="Last name*"
-                ></v-text-field>
+                <v-text-field label="Last name*" required v-model="last_name"></v-text-field>
               </v-col>
               <v-col cols="12">
-                <v-text-field label="Email*" required></v-text-field>
+                <v-text-field label="Email*" required v-model="email"></v-text-field>
               </v-col>
               <v-col cols="12">
-                <v-text-field label="Phone*" required></v-text-field>
+                <v-text-field label="Phone*" required v-model="phone"></v-text-field>
               </v-col>
               <v-col cols="12" sm="5">
-                <v-text-field label="Salary*" type="number" required></v-text-field>
+                <v-text-field label="Salary*" type="number" required v-model="salary"></v-text-field>
               </v-col>
               <v-col cols="12" sm="3">
-                <v-text-field label="Department*" type="number" required></v-text-field>
+                <v-text-field label="Department*" type="number" required v-model="departmentId"></v-text-field>
               </v-col>
             </v-row>
           </v-container>
@@ -76,8 +145,8 @@ export default defineComponent({
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="text" @click="dialog = false"> Close </v-btn>
-          <v-btn color="blue-darken-1" variant="text" @click="dialog = false"> Save </v-btn>
+          <v-btn class="delete_btn" variant="text" @click="dialog = false"> Close </v-btn>
+          <v-btn class="edit_btn" variant="text" @click="addEmployee"> Save </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -101,7 +170,7 @@ export default defineComponent({
       </tr>
     </thead>
     <tbody>
-      <tr v-for="  employee in employees" :key="employee.id">
+      <tr v-for="employee in employees" :key="employee.id">
         <!-- <td> Id </td> -->
         <td>{{ employee.id }}</td>
         <td>{{ employee.firstName }}</td>
@@ -114,7 +183,7 @@ export default defineComponent({
             <button class="edit_btn">Edit</button>
         </td>
         <td>
-            <Button class="delete_btn">Delete</Button></td>
+            <Button class="delete_btn" @click="deleteEmployee(employee.id)">Delete</Button></td>
       </tr>
     </tbody>
   </table>
