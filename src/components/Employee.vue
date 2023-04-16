@@ -74,10 +74,19 @@ export default defineComponent({
 
      // Delete an employee by id
      const deleteEmployee = async (id: number) => {
-      await axios.delete(`http://localhost:5240/api/Employee/Delete Employee/${id}`);
-      alert("Employee Deleted Successfully");
-      // Remove the deleted employee from the employees array
-      employees.value = employees.value.filter((employee) => employee.id !== id);
+        try
+        {
+            await axios.delete(`http://localhost:5240/api/Employee/Delete_Employee?empId=`+id);
+            alert("Employee Deleted Successfully");
+            // Remove the deleted employee from the employees array
+            employees.value = employees.value.filter((employee) => employee.id !== id);    
+        }
+      
+        catch(error)
+        {
+            console.log(error);
+            alert("Error Occurred" + id);
+        }
     };
 
 
