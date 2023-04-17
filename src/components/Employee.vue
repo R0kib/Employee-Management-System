@@ -19,7 +19,7 @@ export default defineComponent({
   setup() {
     const employees = ref([]);
     var dialog = ref(false)
-
+    
 
     // variables for getting data from input form
     var first_name = ref("")
@@ -29,6 +29,18 @@ export default defineComponent({
     var salary = ref("")
     var departmentId = ref("") 
     
+
+    // let departments = [
+    //   { departmentIdNo: 1, name: "HR" },
+    //   { departmentIdNo: 2, name: "Developer" },
+    //   { departmentIdNo: 3, name: "Tester" }
+    // ];
+
+    var departments = [
+      { dept_name: "HR",dept_id: 1  },
+      {  dept_name: "Developer" ,dept_id: 2 },
+      { dept_name: "Tester" ,dept_id: 3}
+    ];
     
     const fetchEmployees =async () => {
         const response = await axios.get('http://localhost:5240/api/Employee');
@@ -119,10 +131,12 @@ export default defineComponent({
       email,
       phone,
       salary,
+     
       departmentId,
       fetchEmployees,
       addEmployee,
       deleteEmployee,
+      departments,
     };
   },
 });
@@ -162,8 +176,16 @@ export default defineComponent({
               <v-col cols="12" sm="5">
                 <v-text-field label="Salary*" type="number" required v-model="salary"></v-text-field>
               </v-col>
-              <v-col cols="12" sm="3">
-                <v-text-field label="Department*" type="number" required v-model="departmentId"></v-text-field>
+              <v-col cols="12" sm="5">
+                <v-autocomplete
+                    v-model="departmentId"
+                    :items=departments
+                    item-title="dept_name"
+                    item-value="dept_id"
+                    label="Department"
+                   
+                    
+                ></v-autocomplete>
               </v-col>
             </v-row>
           </v-container>
