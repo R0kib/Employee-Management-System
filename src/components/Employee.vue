@@ -3,22 +3,25 @@ import { defineComponent, ref, onMounted } from 'vue';
 import axios from 'axios';
 
 
-type Employee = {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  salary : number;
-  departmentId : number
-}
+// type Employee = {
+//   id: number;
+//   first_name: string;
+//   last_name: string;
+//   email: string;
+//   phone: string;
+//   salary : number;
+//   departmentId : number
+// }
 
 
 export default defineComponent({
   name: 'Employee',
   setup() {
     const employees = ref([]);
-    var dialog = ref(false)
+    var insertForm = ref(false);
+    var updateForm = ref(false);
+
+    var update_emp_id : any;
     
 
     // variables for getting data from input form
@@ -42,6 +45,7 @@ export default defineComponent({
       { dept_name: "Tester" ,dept_id: 3}
     ];
     
+    // show all employees
     const fetchEmployees =async () => {
         const response = await axios.get('http://localhost:5240/api/Employee');
         employees.value = response.data;
@@ -50,10 +54,10 @@ export default defineComponent({
     fetchEmployees();
 
 
+
     // Insert new employee
     const addEmployee = async () => {
 
-    // send form data to API
     try
     {
         const data = {
@@ -78,7 +82,7 @@ export default defineComponent({
 
         alert("Employee Inserted Successfully")
 
-        dialog.value = false;
+        insertForm.value = false;
 
         fetchEmployees();
 
@@ -93,6 +97,81 @@ export default defineComponent({
     }
 
 
+
+
+
+
+
+    //get employee details in the form
+    const showUpdateForm = async (employee: any) => 
+    {   
+        update_emp_id = employee.id;
+        first_name.value = employee.firstName;
+        last_name.value = employee.lastName;
+        email.value = employee.email;
+        phone.value = employee.phone;
+        salary.value = employee.salary;
+        departmentId.value = employee.departmentName;
+        updateForm.value = true;
+
+        console.log(employee);
+    }
+
+
+    // clear the form
+    const clearForm = () => 
+    {   
+        first_name.value = "";
+        last_name.value = "";
+        email.value = "";
+        phone.value = "";
+        salary.value = "";
+        departmentId.value = "";
+        updateForm.value = false;
+        insertForm.value = false;
+
+    }
+
+
+    // update employee details
+    const updateEmployee = async () =>
+    {  
+        try
+        {
+            const data = {
+            id : update_emp_id,
+            firstname: first_name.value,
+            lastname: last_name.value,
+            email: email.value,
+            phone : phone.value,
+            salary: salary.value,
+            departmentId: departmentId.value,       
+            }
+            console.log("data",data)
+
+
+           const response = await axios.put('http://localhost:5240/api/Employee/Update_Employee', data)
+
+           console.log(response)
+
+
+            clearForm();
+            alert("Employee Updated Successfully")
+
+           fetchEmployees();
+
+        }
+
+        catch(error)
+        {
+            console.log(error)
+            alert("Input All  the details first")
+        }
+
+            
+
+    }
+
      // Delete an employee by id
      const deleteEmployee = async (id: number) => {
 
@@ -100,6 +179,7 @@ export default defineComponent({
         if(confirm("Are you sure you want to delete this employee?"))
         {
 
+            console.log("Delete Id =" + id);
             try
         {
             await axios.delete(`http://localhost:5240/api/Employee/Delete_Employee?empId=`+id);
@@ -125,17 +205,20 @@ export default defineComponent({
 
     return { 
       employees,
-      dialog,
+      insertForm,
+      updateForm,
       first_name,
       last_name,
       email,
       phone,
       salary,
-     
       departmentId,
       fetchEmployees,
       addEmployee,
+      updateEmployee,
       deleteEmployee,
+      showUpdateForm,
+      clearForm,
       departments,
     };
   },
@@ -148,11 +231,12 @@ export default defineComponent({
 <template>
     <div class="table-name">
         <h2>All Employee Details</h2>
+
         <!-- Insert new employee -->
         <v-row justify="center">
-    <v-dialog v-model="dialog" persistent width="700">
+    <v-dialog v-model="insertForm" persistent width="600">
       <template v-slot:activator="{ props }">
-        <v-btn @click="dialog = true" class="new_employee_btn" v-bind="props">+ New Employee</v-btn>
+        <v-btn @click="insertForm = true" variant="outlined" class="new_employee_btn" v-bind="props">+ New Employee</v-btn>
       </template>
       <v-card>
         <v-card-title>
@@ -183,8 +267,6 @@ export default defineComponent({
                     item-title="dept_name"
                     item-value="dept_id"
                     label="Department"
-                   
-                    
                 ></v-autocomplete>
               </v-col>
             </v-row>
@@ -193,7 +275,7 @@ export default defineComponent({
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn class="delete_btn" variant="text" @click="dialog = false"> Close </v-btn>
+          <v-btn class="delete_btn" variant="text" @click="clearForm"> Close </v-btn>
           <v-btn class="edit_btn" variant="text" @click="addEmployee"> Save </v-btn>
         </v-card-actions>
       </v-card>
@@ -227,9 +309,60 @@ export default defineComponent({
         <td>{{ employee.salary }}</td>
         <td>{{ employee.departmentName }}</td>
         <td>
-            <button class="edit_btn">Edit</button>
+            <!-- Edit options -->
+            <!-- <button class="edit_btn">Edit</button> -->
+            <v-row justify="center">
+                <v-dialog v-model="updateForm" persistent width="600">
+                <template v-slot:activator="{ props }">
+                    <v-btn class="edit_btn"  text v-bind="props" @click="showUpdateForm(employee)">Edit</v-btn>
+                  
+                </template>
+                <v-card>
+                    <v-card-title>
+                    <span class="text-h5">Update Employee Details</span>
+                    </v-card-title>
+                    <v-card-text>
+                    <v-container>
+                        <v-row>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field label="First name*" required v-model="first_name"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field label="Last name*" required v-model="last_name"></v-text-field>
+                        </v-col>
+                        <v-col cols="8">
+                            <v-text-field label="Email*" required v-model="email"></v-text-field>
+                        </v-col>
+                        <v-col cols="8">
+                            <v-text-field label="Phone*" required v-model="phone"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="5">
+                            <v-text-field label="Salary*" type="number" required v-model="salary"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="5">
+                            <v-autocomplete
+                                v-model="departmentId"
+                                :items=departments
+                                item-title="dept_name"
+                                item-value="dept_id"
+                                label="Department"
+                            ></v-autocomplete>
+                        </v-col>
+                        </v-row>
+                    </v-container>
+                    <small>*indicates required field</small>
+                    </v-card-text>
+                    <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn class="delete_btn" variant="text" @click="clearForm"> Close </v-btn>
+                     <v-btn class="edit_btn" variant="text" @click="updateEmployee()"> Save </v-btn>
+                    </v-card-actions>
+                </v-card>
+                </v-dialog>
+            </v-row>
         </td>
         <td>
+            <!-- Delete options -->
             <Button class="delete_btn" @click="deleteEmployee(employee.id)">Delete</Button></td>
       </tr>
     </tbody>
@@ -258,14 +391,16 @@ export default defineComponent({
     background-color: rgb(183, 196, 191);
 }
 .new_employee_btn{
-    background-color: black;
-    color: white ;
+    background-color: rgb(150, 192, 211);
+    border: 2px solid black;
+    border-radius: 5px;
+    color: black ;
     transition: all 0.2s ease-in-out;
 }
 
 .new_employee_btn:hover{
     background-color: black;
-    color: aquamarine;
+    color: rgba(150, 192, 211, 0.877);
 }
 
 .table {
@@ -292,11 +427,13 @@ export default defineComponent({
 
 
 .delete_btn{
-    width: 55px;
+    width: 60px;
+    height: 36px;
     border: 1px solid rgb(143, 143, 143);
     border-radius: 3px;
     padding: 2px;
     color: black;
+    transition: all 0.2s ease-in-out;
 }
 .delete_btn:hover{
     background-color: #a51000;
@@ -311,6 +448,7 @@ export default defineComponent({
     border-radius: 3px;
     padding: 2px;
     color: black;
+    font-family: sans-serif;
 }
 
 .edit_btn:hover{

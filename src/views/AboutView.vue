@@ -3,10 +3,26 @@ import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
   setup() {
+    
     let edit_employee = ref(false)
 
+    // variables for getting data from input form
+    var first_name = ref("")
+    var last_name = ref("")
+    var email = ref("")
+    var phone = ref("")
+    var salary = ref("")
+    var departmentId = ref("") 
+
+    var departments = [
+      { dept_name: "HR",dept_id: 1  },
+      {  dept_name: "Developer" ,dept_id: 2 },
+      { dept_name: "Tester" ,dept_id: 3}
+    ];
+
     return {
-      edit_employee
+      edit_employee,
+      departments
     }
   }
 })
@@ -30,21 +46,28 @@ export default defineComponent({
           <v-container>
             <v-row>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field label="First name*" required></v-text-field>
+                <v-text-field label="First name*" required v-model="first_name"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
-                <v-text-field
-                  label="Last name*"
-                ></v-text-field>
+                <v-text-field label="Last name*" required v-model="last_name"></v-text-field>
               </v-col>
-              <v-col cols="12">
-                <v-text-field label="Email*" required></v-text-field>
+              <v-col cols="8">
+                <v-text-field label="Email*" required v-model="email"></v-text-field>
               </v-col>
-              <v-col cols="12">
-                <v-text-field label="Phone*" required></v-text-field>
+              <v-col cols="8">
+                <v-text-field label="Phone*" required v-model="phone"></v-text-field>
               </v-col>
-              <v-col cols="12" sm="3">
-                <v-text-field label="Salary*" type="number" required></v-text-field>
+              <v-col cols="12" sm="5">
+                <v-text-field label="Salary*" type="number" required v-model="salary"></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="5">
+                <v-autocomplete
+                    v-model="departmentId"
+                    :items=departments
+                    item-title="dept_name"
+                    item-value="dept_id"
+                    label="Department"
+                ></v-autocomplete>
               </v-col>
             </v-row>
           </v-container>
