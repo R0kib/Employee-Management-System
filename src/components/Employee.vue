@@ -30,25 +30,32 @@ export default defineComponent({
     var departmentId = ref("") 
     
     
+    const fetchEmployees =async () => {
+        const response = await axios.get('http://localhost:5240/api/Employee');
+        employees.value = response.data;
+    }
+    
+    fetchEmployees();
+
 
     // Insert new employee
     const addEmployee = async () => {
 
-      // send form data to API
-      try
-      {
+    // send form data to API
+    try
+    {
         const data = {
         firstname: first_name.value,
         lastname: last_name.value,
         email: email.value,
         phone : phone.value,
         salary: salary.value,
-        departmentId: departmentId.value
-      }
+        departmentId: departmentId.value,       
+        }
 
-      const response = await axios.post('http://localhost:5240/api/Employee/Insert_Employee', data)
+        const response = await axios.post('http://localhost:5240/api/Employee/Insert_Employee', data)
 
-      console.log(response)
+        console.log(response)
 
         first_name.value = ""
         last_name.value= ""
@@ -60,6 +67,8 @@ export default defineComponent({
         alert("Employee Inserted Successfully")
 
         dialog.value = false;
+
+        fetchEmployees();
 
       }
 
@@ -74,26 +83,33 @@ export default defineComponent({
 
      // Delete an employee by id
      const deleteEmployee = async (id: number) => {
-        try
+
+
+        if(confirm("Are you sure you want to delete this employee?"))
+        {
+
+            try
         {
             await axios.delete(`http://localhost:5240/api/Employee/Delete_Employee?empId=`+id);
+
+            fetchEmployees();
             alert("Employee Deleted Successfully");
-            // Remove the deleted employee from the employees array
-            employees.value = employees.value.filter((employee) => employee.id !== id);    
+
         }
       
-        catch(error)
-        {
-            console.log(error);
-            alert("Error Occurred" + id);
+            catch(error)
+            {
+                console.log(error);
+                alert("Error Occurred" + id);
+            }
         }
+
+        
     };
 
 
-    onMounted(async () => {
-      const response = await axios.get('http://localhost:5240/api/Employee');
-      employees.value = response.data;
-    });
+    
+
 
     return { 
       employees,
@@ -104,6 +120,7 @@ export default defineComponent({
       phone,
       salary,
       departmentId,
+      fetchEmployees,
       addEmployee,
       deleteEmployee,
     };
@@ -136,10 +153,10 @@ export default defineComponent({
               <v-col cols="12" sm="6" md="4">
                 <v-text-field label="Last name*" required v-model="last_name"></v-text-field>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="8">
                 <v-text-field label="Email*" required v-model="email"></v-text-field>
               </v-col>
-              <v-col cols="12">
+              <v-col cols="8">
                 <v-text-field label="Phone*" required v-model="phone"></v-text-field>
               </v-col>
               <v-col cols="12" sm="5">
@@ -166,8 +183,7 @@ export default defineComponent({
         
         <hr><hr>
         <br>
-        <br>
-        <br>
+        
       <tr>
         <th style="width: 100px;" class="th">ID</th>
         <th class="th">First Name</th>
