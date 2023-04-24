@@ -1,17 +1,7 @@
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref } from 'vue';
 import axios from 'axios';
 
-
-// type Employee = {
-//   id: number;
-//   first_name: string;
-//   last_name: string;
-//   email: string;
-//   phone: string;
-//   salary : number;
-//   departmentId : number
-// }
 
 
 export default defineComponent({
@@ -24,20 +14,25 @@ export default defineComponent({
     var update_emp_id : any;
     
 
-    // variables for getting data from input form
+    // variables for details of employee
     var first_name = ref("")
     var last_name = ref("")
     var email = ref("")
     var phone = ref("")
     var salary = ref("")
     var departmentId = ref("") 
-    
 
-    // let departments = [
-    //   { departmentIdNo: 1, name: "HR" },
-    //   { departmentIdNo: 2, name: "Developer" },
-    //   { departmentIdNo: 3, name: "Tester" }
-    // ];
+    // var employee = ref(
+    //     [
+    //         first_name = ref(""),
+    //         last_name = ref(""),
+    //         email = ref(""),
+    //         phone = ref(""),
+    //         salary = ref(""),
+    //         departmentId = ref("") 
+    //     ]
+    // )
+    
 
     var departments = [
       { dept_name: "HR",dept_id: 1  },
@@ -56,43 +51,45 @@ export default defineComponent({
 
 
     // Insert new employee
-    const addEmployee = async () => {
-
-    try
+    const addEmployee = async () => 
     {
-        const data = {
-        firstname: first_name.value,
-        lastname: last_name.value,
-        email: email.value,
-        phone : phone.value,
-        salary: salary.value,
-        departmentId: departmentId.value,       
+    
+
+        try
+        {
+            const data = {
+                firstname: first_name.value,
+                lastname: last_name.value,
+                email: email.value,
+                phone : phone.value,
+                salary: salary.value,
+                departmentId: departmentId.value,       
+            }
+
+            const response = await axios.post('http://localhost:5240/api/Employee/Insert_Employee', data)
+
+            console.log(response)
+
+            first_name.value = ""
+            last_name.value= ""
+            email.value = ""
+            phone.value = ""
+            salary.value = ""
+            departmentId.value = "" 
+
+            alert("Employee Inserted Successfully")
+
+            insertForm.value = false;
+
+            fetchEmployees();
+
         }
 
-        const response = await axios.post('http://localhost:5240/api/Employee/Insert_Employee', data)
-
-        console.log(response)
-
-        first_name.value = ""
-        last_name.value= ""
-        email.value = ""
-        phone.value = ""
-        salary.value = ""
-        departmentId.value = "" 
-
-        alert("Employee Inserted Successfully")
-
-        insertForm.value = false;
-
-        fetchEmployees();
-
-      }
-
-      catch(error)
-      {
-        console.log(error)
-        alert("Input All  the details first")
-      }
+        catch(error)
+        {
+            console.log(error)
+            alert("Input All  the details first")
+        }
       
     }
 
@@ -234,53 +231,53 @@ export default defineComponent({
 
         <!-- Insert new employee -->
         <v-row justify="center">
-    <v-dialog v-model="insertForm" persistent width="600">
-      <template v-slot:activator="{ props }">
-        <v-btn @click="insertForm = true" variant="outlined" class="new_employee_btn" v-bind="props">+ New Employee</v-btn>
-      </template>
-      <v-card>
-        <v-card-title>
-          <span class="text-h5">Insert Employee Details</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field label="First name*" required v-model="first_name"></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field label="Last name*" required v-model="last_name"></v-text-field>
-              </v-col>
-              <v-col cols="8">
-                <v-text-field label="Email*" required v-model="email"></v-text-field>
-              </v-col>
-              <v-col cols="8">
-                <v-text-field label="Phone*" required v-model="phone"></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="5">
-                <v-text-field label="Salary*" type="number" required v-model="salary"></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="5">
-                <v-autocomplete
-                    v-model="departmentId"
-                    :items=departments
-                    item-title="dept_name"
-                    item-value="dept_id"
-                    label="Department"
-                ></v-autocomplete>
-              </v-col>
-            </v-row>
-          </v-container>
-          <small>*indicates required field</small>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn class="delete_btn" variant="text" @click="clearForm"> Close </v-btn>
-          <v-btn class="edit_btn" variant="text" @click="addEmployee"> Save </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-row>
+            <v-dialog v-model="insertForm" persistent width="600">
+                <template v-slot:activator="{ props }">
+                    <v-btn @click="insertForm = true" variant="outlined" class="new_employee_btn" v-bind="props">+ Add Employee</v-btn>
+                </template>
+                <v-card>
+                    <v-card-title>
+                    <span class="text-h5">Insert Employee Details</span>
+                    </v-card-title>
+                    <v-card-text>
+                    <v-container>
+                        <v-row>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field label="First name*" required v-model="first_name"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="6" md="4">
+                            <v-text-field label="Last name*" required v-model="last_name"></v-text-field>
+                        </v-col>
+                        <v-col cols="8">
+                            <v-text-field label="Email*" required v-model="email"></v-text-field>
+                        </v-col>
+                        <v-col cols="8">
+                            <v-text-field label="Phone*" required v-model="phone"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="5">
+                            <v-text-field label="Salary*" type="number" required v-model="salary"></v-text-field>
+                        </v-col>
+                        <v-col cols="12" sm="5">
+                            <v-autocomplete
+                                v-model="departmentId"
+                                :items=departments
+                                item-title="dept_name"
+                                item-value="dept_id"
+                                label="Department"
+                            ></v-autocomplete>
+                        </v-col>
+                        </v-row>
+                    </v-container>
+                    <small>*indicates required field</small>
+                    </v-card-text>
+                    <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn class="delete_btn" variant="text" @click="clearForm"> Close </v-btn>
+                    <v-btn class="edit_btn" variant="text" @click="addEmployee"> Save </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+        </v-row>
     </div>
   <table class="table">
     <thead>
@@ -409,20 +406,6 @@ export default defineComponent({
   font-weight: 16px;
   margin-left: 100px;
   
-}
-
-.newbtn{
-    background-color: black;
-    color: white;
-    height: 30px;
-    transition: all 0.2s ease-in-out;
-}
-
-.newbtn:hover{
-    background-color: black;
-    color: aqua;
-    height: 30px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 

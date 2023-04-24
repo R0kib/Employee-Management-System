@@ -6,8 +6,6 @@ import Employee from '@/components/Employee.vue';
 
 <template>
   <main>
-    <Employee>
-
-    </Employee>
+    <Employee />
   </main>
 </template>
