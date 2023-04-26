@@ -1,16 +1,3 @@
-<script lang="ts">
-import {
-    RouterLink,
-    RouterView
-} from 'vue-router'
-
-export default{
-  
-}
-
-
-</script>
-
 <template>
 <header>
     <div class="wrapper">
@@ -23,6 +10,28 @@ export default{
 </header>
 <RouterView />
 </template>
+
+
+
+
+<script lang="ts">
+import {
+    RouterLink,
+    RouterView
+} from 'vue-router'
+
+export default{
+
+}
+
+</script>
+
+
+
+
+
+
+
 
 <style>
 header {

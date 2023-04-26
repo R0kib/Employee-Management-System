@@ -1,3 +1,28 @@
+<template>
+<div class="about">
+    <h1>This is an about page</h1>
+
+    <!-- <ModalFormButton 
+    btn-name="+ Add Employee" 
+    btn-class="new_employee_btn" 
+    form-title="Insert Employee Details" 
+    :testfun="testFun" /> -->
+
+    <br><br>
+    <hr><br>
+
+    <!-- <ModalFormButton 
+      btn-name="Edit"
+      btn-class="edit_btn"
+      form-title="Update Employee Details"
+      :testfun="myfun"
+    /> -->
+</div>
+<br>
+</template>
+
+
+
 <script lang="ts">
 import {
     defineComponent,
@@ -28,28 +53,7 @@ export default defineComponent({
 })
 </script>
 
-<template>
-<div class="about">
-    <!-- <h1>This is an about page</h1> -->
 
-    <ModalFormButton 
-    btn-name="+ Add Employee" 
-    btn-class="new_employee_btn" 
-    form-title="Insert Employee Details" 
-    :testfun="testFun" />
-
-    <br><br>
-    <hr><br>
-
-    <!-- <ModalFormButton 
-      btn-name="Edit"
-      btn-class="edit_btn"
-      form-title="Update Employee Details"
-      :testfun="myfun"
-    /> -->
-</div>
-<br>
-</template>
 
 <style scoped>
 .about {

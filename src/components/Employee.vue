@@ -1,241 +1,33 @@
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
-import axios from 'axios';
-
-
-
-export default defineComponent({
-  name: 'Employee',
-  setup() {
-    const employees = ref([]);
-    var insertForm = ref(false);
-    var updateForm = ref(false);
-
-    var update_emp_id : any;
-    
-
-    // variables for details of employee
-    var first_name = ref("")
-    var last_name = ref("")
-    var email = ref("")
-    var phone = ref("")
-    var salary = ref("")
-    var departmentId = ref("") 
-
-    // var employee = ref(
-    //     [
-    //         first_name = ref(""),
-    //         last_name = ref(""),
-    //         email = ref(""),
-    //         phone = ref(""),
-    //         salary = ref(""),
-    //         departmentId = ref("") 
-    //     ]
-    // )
-    
-
-    var departments = [
-      { dept_name: "HR",dept_id: 1  },
-      {  dept_name: "Developer" ,dept_id: 2 },
-      { dept_name: "Tester" ,dept_id: 3}
-    ];
-    
-    // show all employees
-    const fetchEmployees =async () => {
-        const response = await axios.get('http://localhost:5240/api/Employee');
-        employees.value = response.data;
-    }
-    
-    fetchEmployees();
-
-
-
-    // Insert new employee
-    const addEmployee = async () => 
-    {
-    
-
-        try
-        {
-            const data = {
-                firstname: first_name.value,
-                lastname: last_name.value,
-                email: email.value,
-                phone : phone.value,
-                salary: salary.value,
-                departmentId: departmentId.value,       
-            }
-
-            const response = await axios.post('http://localhost:5240/api/Employee/Insert_Employee', data)
-
-            console.log(response)
-
-            first_name.value = ""
-            last_name.value= ""
-            email.value = ""
-            phone.value = ""
-            salary.value = ""
-            departmentId.value = "" 
-
-            alert("Employee Inserted Successfully")
-
-            insertForm.value = false;
-
-            fetchEmployees();
-
-        }
-
-        catch(error)
-        {
-            console.log(error)
-            alert("Input All  the details first")
-        }
-      
-    }
-
-
-
-
-
-
-
-    //get employee details in the form
-    const showUpdateForm = async (employee: any) => 
-    {   
-        update_emp_id = employee.id;
-        first_name.value = employee.firstName;
-        last_name.value = employee.lastName;
-        email.value = employee.email;
-        phone.value = employee.phone;
-        salary.value = employee.salary;
-        departmentId.value = employee.departmentName;
-        updateForm.value = true;
-
-        console.log(employee);
-    }
-
-
-    // clear the form
-    const clearForm = () => 
-    {   
-        first_name.value = "";
-        last_name.value = "";
-        email.value = "";
-        phone.value = "";
-        salary.value = "";
-        departmentId.value = "";
-        updateForm.value = false;
-        insertForm.value = false;
-
-    }
-
-
-    // update employee details
-    const updateEmployee = async () =>
-    {  
-        try
-        {
-            const data = {
-            id : update_emp_id,
-            firstname: first_name.value,
-            lastname: last_name.value,
-            email: email.value,
-            phone : phone.value,
-            salary: salary.value,
-            departmentId: departmentId.value,       
-            }
-            console.log("data",data)
-
-
-           const response = await axios.put('http://localhost:5240/api/Employee/Update_Employee', data)
-
-           console.log(response)
-
-
-            clearForm();
-            alert("Employee Updated Successfully")
-
-           fetchEmployees();
-
-        }
-
-        catch(error)
-        {
-            console.log(error)
-            alert("Input All  the details first")
-        }
-
-            
-
-    }
-
-     // Delete an employee by id
-     const deleteEmployee = async (id: number) => {
-
-
-        if(confirm("Are you sure you want to delete this employee?"))
-        {
-
-            console.log("Delete Id =" + id);
-            try
-        {
-            await axios.delete(`http://localhost:5240/api/Employee/Delete_Employee?empId=`+id);
-
-            fetchEmployees();
-            alert("Employee Deleted Successfully");
-
-        }
-      
-            catch(error)
-            {
-                console.log(error);
-                alert("Error Occurred" + id);
-            }
-        }
-
-        
-    };
-
-
-    
-
-
-    return { 
-      employees,
-      insertForm,
-      updateForm,
-      first_name,
-      last_name,
-      email,
-      phone,
-      salary,
-      departmentId,
-      fetchEmployees,
-      addEmployee,
-      updateEmployee,
-      deleteEmployee,
-      showUpdateForm,
-      clearForm,
-      departments,
-    };
-  },
-});
-</script>
-
-
-
-
 <template>
     <div class="table-name">
         <h2>All Employee Details</h2>
 
         <!-- Insert new employee -->
-        <v-row justify="center">
-            <v-dialog v-model="insertForm" persistent width="600">
+        <ModalFormButton 
+            btn-name="+ Add Employee" 
+            btn-class="new_employee_btn" 
+            form-title="Insert Employee Details" 
+            :form-type="insertForm"
+            :formToggle="insertFormToggle"
+            :save-event="addEmployee" 
+            :close-event="clearForm"
+            :employee-data="employeeData"
+            :first_name="first_name"
+            :last_name="last_name"
+            :email="email"
+            :phone="phone"
+            :salary="salary"
+            :department-id="departmentId"  
+        />
+
+
+        <!-- <v-row justify="center">
+            <v-dialog v-model="insertForm" persistent width="600" transition="dialog-top-transition">
                 <template v-slot:activator="{ props }">
-                    <v-btn @click="insertForm = true" variant="outlined" class="new_employee_btn" v-bind="props">+ Add Employee</v-btn>
+                    <v-btn  @click="insertForm = true" variant="outlined" class="new_employee_btn" v-bind="props">+ Add Employee</v-btn>
                 </template>
-                <v-card>
+                <v-card v-click-outside="clearForm">
+                <v-card >
                     <v-card-title>
                     <span class="text-h5">Insert Employee Details</span>
                     </v-card-title>
@@ -263,7 +55,8 @@ export default defineComponent({
                                 :items=departments
                                 item-title="dept_name"
                                 item-value="dept_id"
-                                label="Department"
+                                label="Department *"
+                                ref="dropdown"
                             ></v-autocomplete>
                         </v-col>
                         </v-row>
@@ -277,7 +70,7 @@ export default defineComponent({
                     </v-card-actions>
                 </v-card>
             </v-dialog>
-        </v-row>
+        </v-row> -->
     </div>
   <table class="table">
     <thead>
@@ -311,10 +104,11 @@ export default defineComponent({
             <v-row justify="center">
                 <v-dialog v-model="updateForm" persistent width="600">
                 <template v-slot:activator="{ props }">
-                    <v-btn class="edit_btn"  text v-bind="props" @click="showUpdateForm(employee)">Edit</v-btn>
+                    <v-btn  class="edit_btn" v-bind="props" @click="showUpdateForm(employee)">Edit</v-btn>
                   
                 </template>
-                <v-card>
+                <!-- v-click-outside="clearForm" -->
+                <v-card >
                     <v-card-title>
                     <span class="text-h5">Update Employee Details</span>
                     </v-card-title>
@@ -342,7 +136,7 @@ export default defineComponent({
                                 :items=departments
                                 item-title="dept_name"
                                 item-value="dept_id"
-                                label="Department"
+                                label="Department *"
                             ></v-autocomplete>
                         </v-col>
                         </v-row>
@@ -366,7 +160,181 @@ export default defineComponent({
   </table>
 </template>
   
-  
+
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
+import axios from 'axios';
+import ModalFormButton from '@/components/ModalFormButton.vue';
+
+
+
+export default defineComponent({
+    name: "Employee",
+    setup() {
+
+
+
+
+        const employees = ref([]);
+        var insertForm = ref(false);
+        var updateForm = ref(false);
+        var update_emp_id: any;
+
+        
+        // variables for details of employee
+        var first_name = ref("");
+        var last_name = ref("");
+        var email = ref("");
+        var phone = ref("");
+        var salary = ref("");
+        var departmentId = ref("");
+
+        const employeeData = {
+            first_name ,
+            last_name,
+            email,
+            phone,
+            salary,
+            departmentId,
+        }
+       
+
+        var departments = [
+            { dept_name: "HR", dept_id: 1 },
+            { dept_name: "Developer", dept_id: 2 },
+            { dept_name: "Tester", dept_id: 3 }
+        ];
+        const insertFormToggle = () => {
+            insertForm.value = true;
+        };
+        // show all employees
+        const fetchEmployees = async () => {
+            const response = await axios.get("http://localhost:5240/api/Employee");
+            employees.value = response.data;
+        };
+        fetchEmployees();
+        // Insert new employee
+        const addEmployee = async () => {
+            try {
+                const data = {
+                    firstname: first_name.value,
+                    lastname: last_name.value,
+                    email: email.value,
+                    phone: phone.value,
+                    salary: salary.value,
+                    departmentId: departmentId.value,
+                };
+
+                console.log(data)
+
+                const response = await axios.post("http://localhost:5240/api/Employee/Insert_Employee", data);
+                console.log(response);
+                first_name.value = "";
+                last_name.value = "";
+                email.value = "";
+                phone.value = "";
+                salary.value = "";
+                departmentId.value = "";
+                alert("Employee Inserted Successfully");
+                insertForm.value = false;
+                fetchEmployees();
+            }
+            catch (error) {
+                console.log(error);
+                alert("Input All  the details first");
+            }
+        };
+        //get employee details in the form
+        const showUpdateForm = (employee: any) => {
+            update_emp_id = employee.id;
+            first_name.value = employee.firstName;
+            last_name.value = employee.lastName;
+            email.value = employee.email;
+            phone.value = employee.phone;
+            salary.value = employee.salary;
+            departmentId.value = employee.departmentName;
+            updateForm.value = true;
+            console.log(employee);
+        };
+
+        // clear the form
+        const clearForm = () => {
+            first_name.value = "";
+            last_name.value = "";
+            email.value = "";
+            phone.value = "";
+            salary.value = "";
+            departmentId.value = "";
+            updateForm.value = false;
+            insertForm.value = false;
+            console.log("clearForm called");
+        };
+
+        
+        // update employee details
+        const updateEmployee = async () => {
+            try {
+                const data = {
+                    id: update_emp_id,
+                    firstname: first_name.value,
+                    lastname: last_name.value,
+                    email: email.value,
+                    phone: phone.value,
+                    salary: salary.value,
+                    departmentId: departmentId.value,
+                };
+                console.log("data", data);
+                const response = await axios.put("http://localhost:5240/api/Employee/Update_Employee", data);
+                console.log(response);
+                alert("Employee Updated Successfully");
+                clearForm();
+                fetchEmployees();
+            }
+            catch (error) {
+                console.log(error);
+                alert("Input All  the details first");
+            }
+        };
+        // Delete an employee by id
+        const deleteEmployee = async (id: number) => {
+            if (confirm("Are you sure you want to delete this employee?")) {
+                console.log("Delete Id =" + id);
+                try {
+                    await axios.delete(`http://localhost:5240/api/Employee/Delete_Employee?empId=` + id);
+                    fetchEmployees();
+                    alert("Employee Deleted Successfully");
+                }
+                catch (error) {
+                    console.log(error);
+                    alert("Error Occurred" + id);
+                }
+            }
+        };
+        return {
+            employees,
+            insertForm,
+            updateForm,
+            first_name,
+            last_name,
+            email,
+            phone,
+            salary,
+            departmentId,
+            fetchEmployees,
+            addEmployee,
+            updateEmployee,
+            deleteEmployee,
+            showUpdateForm,
+            clearForm,
+            departments,
+            insertFormToggle,
+            employeeData
+        };
+    },
+    components: { ModalFormButton }
+});
+</script>
+
 
 <style scoped>
 
